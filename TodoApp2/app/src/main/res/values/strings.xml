@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TodoApp2</string>
+    <string name="action_settings">Settings</string>
+    <string name="delete_button">Delete button</string>
+    <string name="add_alert_message">Enter Todo text here:</string>
+
+</resources>

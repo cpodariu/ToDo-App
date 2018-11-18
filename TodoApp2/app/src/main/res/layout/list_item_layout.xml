@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                xmlns:app="http://schemas.android.com/apk/res-auto"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/swipe_layout">
+
+    <LinearLayout
+            android:background="#ff0400"
+            android:id="@+id/bottom_wrapper"
+            android:layout_width="wrap_content"
+            android:weightSum="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:id="@+id/delete_button"
+                android:src="@drawable/ic_delete"
+                android:contentDescription="@string/delete_button" />
+    </LinearLayout>
+
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <TextView
+                android:id="@+id/key_words_text_view"
+                style="@style/TextAppearance.AppCompat.Large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"/>
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#bcedff"/>
+    </LinearLayout>
+</com.daimajia.swipe.SwipeLayout>

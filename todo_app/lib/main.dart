@@ -31,29 +31,29 @@ class TodoListState extends State<TodoList> {
     return new ListView.builder(
       itemCount: _todoItems.length,
       itemBuilder: (context, index) {
-
         // itemBuilder will be automatically be called as many times as it takes for the
         // list to fill up its available space, which is most likely more than the
         // number of todo items we have. So, we need to check the index is OK.
         if (index < _todoItems.length) {
-          return _buildTodoItem(_todoItems[index], index.toString());
+          return _buildTodoItem(_todoItems[index], index);
         }
       },
     );
   }
 
   // Build a single todo item
-  Widget _buildTodoItem(String todoText, String index) {
+  Widget _buildTodoItem(String todoText, int index) {
     return Dismissible(
       // Each Dismissible must contain a Key. Keys allow Flutter to
       // uniquely identify Widgets.
-      key: Key(todoText + index),
+      key: Key(todoText + index.toString()),
+
       // We also need to provide a function that tells our app
       // what to do after an item has been swiped away.
       onDismissed: (direction) {
         // Remove the item from our data source.
         setState(() {
-          _todoItems.removeAt(int.parse(index));
+          _todoItems.removeAt(index);
         });
 
         // Then show a snackbar!
@@ -62,8 +62,29 @@ class TodoListState extends State<TodoList> {
       },
       // Show a red background as the item is swiped away
       background: Container(color: Colors.red),
-      child: ListTile(title: Text(todoText)),
+      child:
+          ListTile(title: Text(todoText), onLongPress: () => editItem(index)),
     );
+  }
+
+  void editItem(int index) {
+    Navigator.of(context).push(
+        // MaterialPageRoute will automatically animate the screen entry, as well
+        // as adding a back button to close it
+        new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+          appBar: new AppBar(title: new Text('Edit item')),
+          body: new TextField(
+            autofocus: true,
+            onSubmitted: (val) {
+              _todoItems[index] = val;
+              Navigator.pop(context); // Close the add todo screen
+            },
+            decoration: new InputDecoration(
+                hintText: _todoItems[index],
+                contentPadding: const EdgeInsets.all(16.0)),
+          ));
+    }));
   }
 
   @override
