@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import com.daimajia.swipe.SwipeLayout
+import com.example.podar.todoapp2.controller.TodoItemsController
 import com.example.podar.todoapp2.model.TodoItem
 import kotlinx.android.synthetic.main.list_item_layout.view.*
 import org.jetbrains.anko.*
@@ -16,7 +17,7 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onLongClick
 
 
-class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context) :
+class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context, val controller: TodoItemsController) :
     RecyclerView.Adapter<TodoItemsAdapter.ListItemViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoItemsAdapter.ListItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_layout, parent, false)
@@ -31,15 +32,21 @@ class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context)
         holder.bindTodoItem(
             todoItemsList[position],
             ctx,
-            fun(k: TodoItem) { todoItemsList.remove(k); notifyDataSetChanged() },
+            fun(k: TodoItem) {
+                controller.delete(k.id)
+                updateListItems()
+            },
             fun(k: TodoItem, s: String) {
-                todoItemsList.set(
-                    todoItemsList.indexOf(k),
-                    TodoItem(s)
-                ); notifyDataSetChanged()
+                controller.update(k.id, s)
+                updateListItems()
             })
     }
 
+    public fun updateListItems() {
+        todoItemsList.clear()
+        todoItemsList.addAll(controller.getAll())
+        this.notifyDataSetChanged()
+    }
 
     class ListItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindTodoItem(
@@ -59,6 +66,7 @@ class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context)
                     lateinit var et: EditText
                     positiveButton("Update") {
                         updateElem(todoItem, et.text.toString())
+
                     }
                     customView {
                         linearLayout {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/TodoItem.dart';
+import 'package:todo_app/controller.dart';
 
 void main() => runApp(new TodoApp());
 
@@ -15,54 +17,84 @@ class TodoList extends StatefulWidget {
 }
 
 class TodoListState extends State<TodoList> {
-  List<String> _todoItems = [];
+  TodoItemController controller = new TodoItemController();
+  List<TodoItem> items = [];
+
+  @override
+  initState() {
+    super.initState();
+    controller.open("TODOAPPFLUTTER").then((i) {
+      getItems();
+    });
+  }
+
+  Future getItems() async {
+    print("getItems");
+    items.clear();
+    controller.getTodoItems().then((res) {
+      res.forEach((i) {
+        items.add(i);
+      });
+    }).then((x) {
+      setState(() {});
+    });
+  }
 
   void _addTodoItem(String task) {
     if (task.length > 0) {
-      setState(() => _todoItems.add(task));
+      TodoItem item = new TodoItem();
+      item.title = task;
+      controller.insert(item).then((it) {
+        getItems();
+      });
     }
   }
+
   Widget _buildTodoList() {
     return new ListView.builder(
-      itemCount: _todoItems.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        if (index < _todoItems.length) {
-          return _buildTodoItem(_todoItems[index], index);
+        if (index < items.length) {
+          return _buildTodoItem(items[index]);
         }
       },
     );
   }
 
-  Widget _buildTodoItem(String todoText, int index) {
+  Widget _buildTodoItem(TodoItem todoItem) {
     return Dismissible(
-      key: Key(todoText + index.toString()),
+      key: Key(todoItem.id.toString()),
       onDismissed: (direction) {
-        setState(() {
-          _todoItems.removeAt(index);
+        var text = todoItem.title;
+        items.remove(todoItem);
+        controller.delete(todoItem.id).then((i) {
+          getItems();
         });
-
-        Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text("$index dismissed")));
+//        Scaffold.of(context)
+//            .showSnackBar(SnackBar(content: Text("$text dismissed")));
       },
       background: Container(color: Colors.red),
-      child:
-          ListTile(title: Text(todoText), onLongPress: () => editItem(index)),
+      child: ListTile(
+          title: Text(todoItem.title), onLongPress: () => editItem(todoItem)),
     );
   }
 
-  void editItem(int index) {
-    Navigator.of(context).push(
-        new MaterialPageRoute(builder: (context) {
+  void editItem(TodoItem item) {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
       return new Scaffold(
           appBar: new AppBar(title: new Text('Edit item')),
           body: new TextField(
             autofocus: true,
             onSubmitted: (val) {
-              _todoItems[index] = val;
+//              items[index] = val;
+              item.title = val;
+              controller.update(item).then((i) {
+                getItems();
+              });
               Navigator.pop(context);
             },
             decoration: new InputDecoration(
-                hintText: _todoItems[index],
+                hintText: item.title,
                 contentPadding: const EdgeInsets.all(16.0)),
           ));
     }));
@@ -70,6 +102,8 @@ class TodoListState extends State<TodoList> {
 
   @override
   Widget build(BuildContext context) {
+    print("build");
+
     return new Scaffold(
       appBar: new AppBar(title: new Text('Todo List')),
       body: _buildTodoList(),
@@ -81,8 +115,7 @@ class TodoListState extends State<TodoList> {
   }
 
   void _pushAddTodoScreen() {
-    Navigator.of(context).push(
-        new MaterialPageRoute(builder: (context) {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
       return new Scaffold(
           appBar: new AppBar(title: new Text('Add a new task')),
           body: new TextField(

@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.LinearLayout
+import com.example.podar.todoapp2.controller.TodoItemsController
 import com.example.podar.todoapp2.model.TodoItem
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
@@ -17,28 +18,26 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 class MainActivity : AppCompatActivity() {
 
     private val todoItemsArrayList = ArrayList<TodoItem>()
+    private val controller = com.example.podar.todoapp2.controller.TodoItemsController(this);
+    private val adapter = TodoItemsAdapter(todoItemsArrayList, this, controller)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         todoItemsList.layoutManager = LinearLayoutManager(this)
-
         toolbar.title = "TODOS"
-//        database.use { update("TodoItem", "lastID" to "MEMO/18/2601")
-//                .whereSimple("_id = ?", "1")
-//                .exec()  }
 
-        todoItemsList.adapter = TodoItemsAdapter(todoItemsArrayList, this)
-//        todoItemsArrayList.add(TodoItem(1, "asds"))
 
-//        updateTodoItemList()
-//
+        todoItemsList.adapter = adapter
+
+
         fab.onClick {
             alert {
                 title = "New todoItems:"
                 lateinit var et: EditText
                 positiveButton("Add") {
-                    todoItemsArrayList.add(TodoItem(et.text.toString()))
+                    controller.add(et.text.toString())
+                    adapter.updateListItems()
                 }
                 customView {
                     linearLayout {
@@ -61,5 +60,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }.show()
         }
+
+        adapter.updateListItems()
     }
 }

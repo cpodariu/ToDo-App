@@ -5,5 +5,5 @@ package com.example.podar.todoapp2.model
  * For any questions please contact me at podariucatalin97@gmail.com
  */
 
-data class TodoItem(val word: String) {
+data class TodoItem(val id: Long, val word: String) {
 }
