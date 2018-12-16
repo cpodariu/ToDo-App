@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.daimajia.swipe.SwipeLayout
 import com.example.podar.todoapp2.controller.TodoItemsController
 import com.example.podar.todoapp2.model.TodoItem
@@ -15,10 +16,13 @@ import kotlinx.android.synthetic.main.list_item_layout.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onLongClick
-
+import java.util.concurrent.locks.ReentrantLock
 
 class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context, val controller: TodoItemsController) :
     RecyclerView.Adapter<TodoItemsAdapter.ListItemViewHolder>() {
+    private val lock = ReentrantLock()
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoItemsAdapter.ListItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_layout, parent, false)
         return TodoItemsAdapter.ListItemViewHolder(view)
@@ -33,18 +37,25 @@ class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context,
             todoItemsList[position],
             ctx,
             fun(k: TodoItem) {
-                controller.delete(k.id)
-                updateListItems()
+                if (controller.delete(k.id))
+                    updateListItems()
+                else
+                    Toast.makeText(ctx, "No internet", Toast.LENGTH_LONG).show()
             },
             fun(k: TodoItem, s: String) {
-                controller.update(k.id, s)
-                updateListItems()
+                if (controller.update(k.id, s))
+                    updateListItems()
+                else
+                    Toast.makeText(ctx, "No internet", Toast.LENGTH_LONG).show()
+
             })
     }
 
     public fun updateListItems() {
+        lock.lock();
         todoItemsList.clear()
         todoItemsList.addAll(controller.getAll())
+        lock.unlock();
         this.notifyDataSetChanged()
     }
 
@@ -55,7 +66,7 @@ class TodoItemsAdapter(val todoItemsList: ArrayList<TodoItem>, val ctx: Context,
             deleteElem: (TodoItem) -> Unit,
             updateElem: (TodoItem, String) -> Unit
         ) {
-            itemView.key_words_text_view.text = todoItem.word
+            itemView.key_words_text_view.text = todoItem.value
             itemView.swipe_layout.addDrag(SwipeLayout.DragEdge.Right, itemView.bottom_wrapper);
             itemView.delete_button.onClick {
                 deleteElem(todoItem)
