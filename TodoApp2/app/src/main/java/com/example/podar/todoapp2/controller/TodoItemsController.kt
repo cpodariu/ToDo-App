@@ -83,45 +83,45 @@ class TodoItemsController(val ctx: Context, val callback: () -> Unit) {
 
     fun syncWithServer(ctx: Context, callback: () -> Unit) {
         lock.lock();
-        if (!isSynced) {
-            if (NetworkHelper.checkNetwork(ctx)) {
-                getAll().forEach { it ->
-                    run {
-                        if (!it.synced) {
-                            ctx.database.use { execSQL("DELETE FROM TodoItem WHERE id is " + it.id) }
-                            NetworkHelper.addTodoItem(TodoItem(value = it.value))
-                        }
+//        if (!isSynced) {
+        if (NetworkHelper.checkNetwork(ctx)) {
+            getAll().forEach { it ->
+                run {
+                    if (!it.synced) {
+                        ctx.database.use { execSQL("DELETE FROM TodoItem WHERE id is " + it.id) }
+                        NetworkHelper.addTodoItem(TodoItem(value = it.value))
                     }
-                }
-
-                val items = NetworkHelper.getTodoItems()
-                ctx.database.use {
-                    beginTransaction()
-                    try {
-                        items.forEach { it ->
-                            run {
-                                val values = ContentValues();
-                                values.put("id", it.id);
-                                values.put("value", it.value);
-                                values.put("synced", it.synced);
-                                insertWithOnConflict(
-                                    "TodoItem", null,
-                                    values, SQLiteDatabase.CONFLICT_REPLACE
-                                )
-                            }
-                        }
-                        setTransactionSuccessful()
-                    } finally {
-                        endTransaction()
-                    }
-                }
-                this.isSynced = true;
-                callback()
-            } else {
-                ctx.runOnUiThread {
-                    Toast.makeText(ctx, "No internet connection", Toast.LENGTH_LONG).show()
                 }
             }
+
+            val items = NetworkHelper.getTodoItems()
+            ctx.database.use {
+                beginTransaction()
+                try {
+                    items.forEach { it ->
+                        run {
+                            val values = ContentValues();
+                            values.put("id", it.id);
+                            values.put("value", it.value);
+                            values.put("synced", it.synced);
+                            insertWithOnConflict(
+                                "TodoItem", null,
+                                values, SQLiteDatabase.CONFLICT_REPLACE
+                            )
+                        }
+                    }
+                    setTransactionSuccessful()
+                } finally {
+                    endTransaction()
+                }
+            }
+            this.isSynced = true;
+            callback()
+        } else {
+            ctx.runOnUiThread {
+                Toast.makeText(ctx, "No internet connection", Toast.LENGTH_LONG).show()
+            }
+//            }
         }
         lock.unlock();
     }

@@ -19,6 +19,14 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import javax.inject.Inject
 import android.support.v4.widget.SwipeRefreshLayout
+import android.util.Log
+import com.bugsnag.android.Bugsnag
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.InterstitialAd
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     private val controller = TodoItemsController(this,  fun() { update() });
     private val adapter = TodoItemsAdapter(todoItemsArrayList, this, controller)
 
+    private val mInterstitialAd: InterstitialAd = InterstitialAd(this);
+
     fun update(){
         adapter.updateListItems();
     }
@@ -34,12 +44,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Bugsnag.init(this)
+        Bugsnag.notify(RuntimeException("Test error"))
         todoItemsList.layoutManager = LinearLayoutManager(this)
         toolbar.title = "TODOS"
+
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(AdRequest.Builder().build())
+        mInterstitialAd.adListener = object : AdListener(){
+                override fun onAdLoaded() {
+                    super.onAdLoaded()
+                    mInterstitialAd.show();
+                }
+        }
 
         doAsync {
             controller.syncWithServer(ctx, fun() { adapter.updateListItems() })
         }
+
 
         registerReceiver(
             NetworkChangeReceiver(controller, fun() { adapter.updateListItems() }),
@@ -50,6 +72,11 @@ class MainActivity : AppCompatActivity() {
 
 
         fab.onClick {
+//            if (mInterstitialAd.isLoaded) {
+//                mInterstitialAd.show()
+//            } else {
+//                Log.d("TAG", "The interstitial wasn't loaded yet.")
+//            };
             alert {
                 title = "New todoItems:"
                 lateinit var et: EditText

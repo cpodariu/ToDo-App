@@ -15,6 +15,9 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme" android:fullBackupContent="@xml/backup_descriptor" android:allowBackup="true">
+        <meta-data
+                android:name="com.bugsnag.android.API_KEY"
+                android:value="6cb03629af62b577455f6c10754976f0"/>
         <activity
                 android:name=".MainActivity"
                 android:label="@string/app_name"
@@ -31,6 +34,10 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-9357682521372454~1910895007"/>
 
     </application>
 

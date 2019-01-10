@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.util.Log
+import com.bugsnag.android.Bugsnag
 import com.example.podar.todoapp2.controller.TodoItemsController
 import org.jetbrains.anko.doAsync
 
